@@ -1,15 +1,13 @@
 <?php
 
-use BeyondCode\LaravelWebSockets\Dashboard\Http\Middleware\Authorize;
-
 return [
 
     /*
      * Set a custom dashboard configuration
      */
     'dashboard' => [
-        'port' => env('LARAVEL_WEBSOCKETS_PORT', 6001),
-        'host' => env("LARAVEL_WEBSOCKETS_HOST")
+        'port' => env('LARAVEL_WEBSOCKETS_EXTERNAL_PORT', 6001),
+        "host" => env("LARAVEL_WEBSOCKETS_EXTERNAL_HOST", "127.0.0.1")
     ],
 
     /*
@@ -24,17 +22,16 @@ return [
      */
     'apps' => [
         [
-            'port' => env('LARAVEL_WEBSOCKETS_PORT', 6001),
-            'host' => env("LARAVEL_WEBSOCKETS_HOST"),
-            'id' => env('PUSHER_APP_ID'),
-            'name' => env('APP_NAME'),
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
+            'id' => env('PUSHER_APP_ID', "staging"),
+            'name' => env('APP_NAME',  "staging"),
+            'host' => env('LARAVEL_WEBSOCKETS_EXTERNAL_HOST',  "127.0.0.1"),
+            'port' => env('LARAVEL_WEBSOCKETS_EXTERNAL_PORT', 6001),
+            'key' => env('PUSHER_APP_KEY', "staging"),
+            'secret' => env('PUSHER_APP_SECRET', "staging"),
             'path' => env('PUSHER_APP_PATH'),
-            'capacity' => null,
-            'enable_client_messages' => false,
+            'enable_client_messages' => true,
             'enable_statistics' => true,
-
+            'encrypted' => (env("APP_ENV") === "local" || env("APP_ENV") === "dev") ? false : true,
         ],
     ],
 
@@ -51,9 +48,7 @@ return [
      * This array contains the hosts of which you want to allow incoming requests.
      * Leave this empty if you want to accept requests from all hosts.
      */
-    'allowed_origins' => [
-        //
-    ],
+    'allowed_origins' => [],
 
     /*
      * The maximum request size in kilobytes that is allowed for an incoming WebSocket request.
@@ -63,7 +58,7 @@ return [
     /*
      * This path will be used to register the necessary routes for the package.
      */
-    'path' => 'laravel-websockets',
+    'path' => 'websockets-monitor',
 
     /*
      * Dashboard Routes Middleware
@@ -74,7 +69,9 @@ return [
      */
     'middleware' => [
         'web',
-        Authorize::class,
+        // Authorize::class
+        // "master",
+        // "auth"
     ],
 
     'statistics' => [
@@ -121,17 +118,10 @@ return [
          * in a separate file specified by local_pk.
          */
         'local_cert' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_CERT', null),
-
-        /*
-         * Path to local private key file on filesystem in case of separate files for
-         * certificate (local_cert) and private key.
-         */
         'local_pk' => env('LARAVEL_WEBSOCKETS_SSL_LOCAL_PK', null),
-
-        /*
-         * Passphrase for your local_cert file.
-         */
         'passphrase' => env('LARAVEL_WEBSOCKETS_SSL_PASSPHRASE', null),
+        "verify_peer" => (env("APP_ENV") === "local" || env("APP_ENV") === "dev") ? false : true,
+        "allow_self_signed" => (env("APP_ENV") === "local" || env("APP_ENV") === "dev") ? true : false
     ],
 
     /*
